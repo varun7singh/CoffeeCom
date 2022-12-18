@@ -1,8 +1,10 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import User
 
 
 class StreamingPlatform(models.Model):
+    
     name = models.CharField(max_length=100)
     about = models.CharField(max_length=300)
     website = models.URLField(max_length=100)
@@ -12,6 +14,7 @@ class StreamingPlatform(models.Model):
 
 
 class Movies(models.Model):
+    
     Mname = models.CharField(max_length=100)
     Mdesc = models.CharField(max_length=300)
     isPublished = models.BooleanField(default=True)
@@ -24,6 +27,8 @@ class Movies(models.Model):
 
 
 class Reviews(models.Model):
+    
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author')
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     title = models.CharField(max_length=100)
     Rdesc = models.CharField(max_length=500, null=True)
@@ -34,3 +39,5 @@ class Reviews(models.Model):
 
     def __str__(self):
         return self.title
+    
+

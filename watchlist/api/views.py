@@ -5,6 +5,7 @@ from watchlist.api.serializers import MovieSerializer, StreamingSerializer, Revi
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import generics
+from rest_framework.exceptions import ValidationError
 # from rest_framework import mixins
 
 #  below is function defined api_view
@@ -153,16 +154,27 @@ class ReviewList(generics.ListAPIView):
         id = self.kwargs['id']
         return Reviews.objects.filter(movie=id)
 
+
 class ReviewCreate(generics.CreateAPIView):
+    queryset = Reviews.objects.all()
     serializer_class = ReviewSerializer
-    
+
     # overinding the perform_create method to add review to movie we want rather than specifying the movie_id in url to add review
     def perform_create(self, serializer):
         id = self.kwargs['id']
         movie = Movies.objects.get(id=id)
-        serializer.save(movie=movie)
+        # user should be able to review only once
+        author = self.request.user
+        isReviewed = Reviews.objects.filter(
+            movie=movie, author=author).exists()
+        if (isReviewed):
+            raise ValidationError("You can review only once")
+        serializer.save(movie=movie, author=author)
+        return Response(serializer.data)
+
 
 class ReviewDetails(generics.RetrieveUpdateDestroyAPIView):
+
     queryset = Reviews.objects.all()
     serializer_class = ReviewSerializer
     # as default lookup_field is pk but we have used id in our model

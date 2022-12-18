@@ -29,7 +29,7 @@ import datetime
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-
+    author = serializers.StringRelatedField(read_only=True) # to get the username 
     class Meta:
         model = Reviews
         # the extra comma is important because it tells python that it is a tuple
